@@ -7,8 +7,6 @@ var rock = new Shape("Rock", 1, element => element.Name is "Scissors");
 var paper = new Shape("Paper", 2, element => element.Name is "Rock");
 var scissors = new Shape("Scissors", 3, element => element.Name is "Paper");
 
-
-
 public record Game(string OpponentMove, string YourMove);
 
 public record Shape(string Name, int Score, Func<Shape, bool> Beats);
@@ -44,9 +42,9 @@ Dictionary<Shape, Shape> WinsOverMap = new()
     {scissors, paper},
 };
 
-public Shape GetShape(Game game) => Map[game.YourMove];
+public Shape SimpleStrategy(Game game) => Map[game.YourMove];
 
-public Shape GetSmartShape(Game game) => game.YourMove switch
+public Shape SmartStrategy(Game game) => game.YourMove switch
 {
     "X" => WinsOverMap[Map[game.OpponentMove]],
     "Z" => LoosesToMap[Map[game.OpponentMove]],
@@ -83,6 +81,5 @@ public (Player You, Player Opponent) Play(Func<Game, Shape> strategy)
     return (you, opponent);
 }
 
-//WriteLine(Play(GetShape).You.TotalScore);
-
-WriteLine(Play(GetSmartShape).You.TotalScore);
+WriteLine($"Total score using simple strategy: {Play(SimpleStrategy).You.TotalScore}");
+WriteLine($"Total score using smart strategy: {Play(SmartStrategy).You.TotalScore}");

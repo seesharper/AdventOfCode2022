@@ -7,6 +7,12 @@ var rock = new Shape("Rock", 1, element => element.Name is "Scissors");
 var paper = new Shape("Paper", 2, element => element.Name is "Rock");
 var scissors = new Shape("Scissors", 3, element => element.Name is "Paper");
 
+
+
+public record Game(string OpponentMove, string YourMove);
+
+public record Shape(string Name, int Score, Func<Shape, bool> Beats);
+
 Dictionary<string, Shape> Map = new()
 {
     {"A", rock},
@@ -17,44 +23,66 @@ Dictionary<string, Shape> Map = new()
     {"Z", scissors},
 };
 
-foreach (var line in lines)
-{
-    var opponentShape = Map[line.Substring(0, 1)];
-    var yourShape = Map[line.Substring(2, 1)];
-    var game = new Game(opponentShape, yourShape);
-    games.Add(game);
-}
-
-public record Game(Shape OpponentShape, Shape YourShape);
-
-public record Shape(string Name, int Score, Func<Shape, bool> Beats);
+games = lines.Select(line => new Game(line.Substring(0, 1), line.Substring(2, 1))).ToList();
 
 public class Player
 {
     public int TotalScore { get; set; }
 }
 
-var opponent = new Player();
-var you = new Player();
-
-foreach (var game in games)
+Dictionary<Shape, Shape> LoosesToMap = new()
 {
-    if (game.OpponentShape == game.YourShape)
-    {
-        opponent.TotalScore += game.OpponentShape.Score + 3;
-        you.TotalScore += game.YourShape.Score + 3;
-    }
+    {rock, paper},
+    {paper, scissors},
+    {scissors, rock},
+};
 
-    else if (game.OpponentShape.Beats(game.YourShape))
+Dictionary<Shape, Shape> WinsOverMap = new()
+{
+    {rock, scissors},
+    {paper, rock},
+    {scissors, paper},
+};
+
+public Shape GetShape(Game game) => Map[game.YourMove];
+
+public Shape GetSmartShape(Game game) => game.YourMove switch
+{
+    "X" => WinsOverMap[Map[game.OpponentMove]],
+    "Z" => LoosesToMap[Map[game.OpponentMove]],
+    _ => Map[game.OpponentMove]
+};
+
+public (Player You, Player Opponent) Play(Func<Game, Shape> strategy)
+{
+    var opponent = new Player();
+    var you = new Player();
+
+    foreach (var game in games)
     {
-        opponent.TotalScore += game.OpponentShape.Score + 6;
-        you.TotalScore += game.YourShape.Score;
+        var opponentShape = Map[game.OpponentMove];
+        var yourShape = strategy(game);
+
+        if (opponentShape == yourShape)
+        {
+            opponent.TotalScore += opponentShape.Score + 3;
+            you.TotalScore += yourShape.Score + 3;
+        }
+
+        else if (opponentShape.Beats(yourShape))
+        {
+            opponent.TotalScore += opponentShape.Score + 6;
+            you.TotalScore += yourShape.Score;
+        }
+        else
+        {
+            you.TotalScore += yourShape.Score + 6;
+            opponent.TotalScore += opponentShape.Score;
+        }
     }
-    else
-    {
-        you.TotalScore += game.YourShape.Score + 6;
-        opponent.TotalScore += game.OpponentShape.Score;
-    }
+    return (you, opponent);
 }
 
-WriteLine(you.TotalScore);
+//WriteLine(Play(GetShape).You.TotalScore);
+
+WriteLine(Play(GetSmartShape).You.TotalScore);

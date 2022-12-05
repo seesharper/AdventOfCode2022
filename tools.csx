@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 public static void ShouldBe<T>(this T value, T expected)
 {
@@ -37,6 +38,8 @@ public static int Parse(this string value)
     return int.Parse(value);
 }
 
+public static int[] MatchNumbers(this string value)
+    => Regex.Matches(value, @"\d+").Select(m => m.Groups[0].Value.Parse()).ToArray();
 
 public static int GetMostCommonBits(this int[] values, int bitCount, int whenEqual = 0)
 {

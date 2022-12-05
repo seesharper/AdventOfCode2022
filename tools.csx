@@ -41,6 +41,25 @@ public static int Parse(this string value)
 public static int[] MatchNumbers(this string value)
     => Regex.Matches(value, @"\d+").Select(m => m.Groups[0].Value.Parse()).ToArray();
 
+public static T[] PopMany<T>(this Stack<T> stack, int count)
+{
+    List<T> result = new();
+    for (int i = 0; i < count; i++)
+    {
+        result.Add(stack.Pop());
+    }
+    return result.ToArray();
+}
+
+public static void PushMany<T>(this Stack<T> stack, T[] values)
+{
+    foreach (var value in values)
+    {
+        stack.Push(value);
+    }
+}
+
+
 public static int GetMostCommonBits(this int[] values, int bitCount, int whenEqual = 0)
 {
     int[] bitsSet = new int[bitCount];

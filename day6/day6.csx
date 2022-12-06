@@ -1,25 +1,22 @@
 #load "../tools.csx"
 var input = File.ReadAllText("day6/input.txt");
-input.Dump();
 
 public record Buffer(string Content, int Start, int End);
 
-int positionWhereMarkerIsComplete = 0;
+WriteLine($"Number of characters processed before first start-of-packet marker is received: {FirstUniqueBuffer(4).End}");
+WriteLine($"Number of characters processed before first start-of-message marker is received: {FirstUniqueBuffer(14).End}");
 
-for (int i = 0; i < input.Length; i++)
+Buffer FirstUniqueBuffer(int bufferLength)
 {
-    var buffer = new Buffer(input.Substring(i, 4), i, i + 4);
-    if (buffer.IsMarker())
+    for (int i = 0; i < input.Length; i++)
     {
-        positionWhereMarkerIsComplete = buffer.End;
-        break;
+        var buffer = new Buffer(input.Substring(i, bufferLength), i, i + bufferLength);
+        if (buffer.IsMarker())
+        {
+            return buffer;
+        }
     }
+    return new Buffer(string.Empty, 0, 0);
 }
 
-positionWhereMarkerIsComplete.Dump();
-
-
-static bool IsMarker(this Buffer buffer)
-{
-    return buffer.Content.Distinct().Count() == buffer.Content.Length;
-}
+static bool IsMarker(this Buffer buffer) => buffer.Content.Distinct().Count() == buffer.Content.Length;

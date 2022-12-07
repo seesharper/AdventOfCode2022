@@ -4,6 +4,10 @@ using System.Text.RegularExpressions;
 
 var lines = File.ReadAllLines("day7/input.txt");
 
+int totalDiskSpace = 70000000;
+
+int spaceRequiredByUpdate = 30000000;
+
 public enum FileType
 {
     RegularFile,
@@ -23,17 +27,10 @@ public class FsFile
     }
 
     public string Path { get; }
-
     public int Size { get; set; }
-
     public FileType FileType { get; }
-
     public HashSet<FsFile> Files { get; }
-
-    public void AddFile(FsFile fsFile)
-    {
-        Files.Add(fsFile);
-    }
+    public void AddFile(FsFile fsFile) => Files.Add(fsFile);
 }
 
 public class FileSystem
@@ -119,6 +116,17 @@ foreach (var line in lines)
     }
 }
 
-// fileSystem.Dump();
 
-fileSystem.Files.Values.Where(file => file.Size < 100000 && file.FileType == FileType.Directory).Sum(file => file.Size).Dump();
+var totalSizesOfDirectoriesWithSizeBelow1000000 = fileSystem.Files.Values.Where(file => file.Size < 100000 && file.FileType == FileType.Directory).Sum(file => file.Size);
+WriteLine($"The sum of the total sizes of directories with size less than 1000000: {totalSizesOfDirectoriesWithSizeBelow1000000}");
+
+var freeSpace = (totalDiskSpace - fileSystem.Files["/"].Size);
+var spaceNeededForUpdate = spaceRequiredByUpdate - freeSpace;
+
+var sizeOfSmallestDirectoryToDelete = fileSystem.Files.Values.Where(file => file.FileType == FileType.Directory).Where(file => file.Size >= spaceNeededForUpdate).OrderBy(file => file.Size).Select(file => file.Size).First();
+WriteLine($"Size of the smallest directory to delete to free up space for update: {sizeOfSmallestDirectoryToDelete}");
+
+
+
+
+

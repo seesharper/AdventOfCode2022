@@ -22,6 +22,23 @@ public static void Dump<T>(this T value, string whatIsThis)
     WriteLine();
 }
 
+public static void Dump<T>(this T[,] value, Func<T, string> formatter = null)
+{
+    formatter ??= v => v.ToString();
+
+    StringBuilder rowBuilder = new StringBuilder();
+    for (int r = 0; r < value.GetLength(0); r++)
+    {
+        for (int c = 0; c < value.GetLength(1); c++)
+        {
+            rowBuilder.Append(formatter(value[r, c]));
+        }
+        WriteLine(rowBuilder.ToString());
+        rowBuilder.Clear();
+    }
+}
+
+
 public static bool IsSet(this int value, int bitPosition)
 {
     return (value & (1 << bitPosition)) != 0;
